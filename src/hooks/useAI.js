@@ -8,6 +8,7 @@ const KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 // Tried in order — if one fails with "no endpoints", next is attempted.
 // Do NOT rely on env var model names — they go stale when models are removed.
 const FREE_MODELS = [
+  "nvidia/nemotron-nano-12b-v2-vl:free"
   "deepseek/deepseek-chat-v3-0324:free",
   "google/gemma-3-27b-it:free",
   "meta-llama/llama-4-scout:free",
