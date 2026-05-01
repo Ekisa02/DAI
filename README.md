@@ -1,47 +1,49 @@
-# 🧠 Decimate AI — Empowering Smart Decisions
+# 🧠 Decimate AI v2.0
 
 > AI-powered decision intelligence for students and professionals.
-> Built for Hult Prize 2026 · Kenya National Competition · Strathmore University
+> Built for **Hult Prize 2026** · Kenya National Competition · Strathmore University
 
 ---
 
-## ✨ Features
+## ✨ What's New in v2
 
-- **Multi-step Onboarding** — collects and saves user preferences (name, role, goals, challenges, work style, AI personality, custom instructions)
-- **AI-Powered Decision Planning** — generates time-blocked schedules using Mistral 7B via OpenRouter (free)
-- **AI Chat Assistant** — conversational AI with full context of your profile and preferences
-- **Decision History** — all saved plans persisted in localStorage via Zustand
-- **Settings** — update profile, switch AI personality, edit custom instructions
-- **Fully Responsive** — works on desktop, tablet, and mobile
-- **Dark Mode** — premium dark UI with vibrant accents
+- ✅ **AI Chat fully working** — real OpenRouter API calls with context awareness
+- ✅ **Make a Decision** — AI picks the single best choice from your options with ✓/✗ verdict buttons
+- ✅ **Create Plan / Build Timetable** — role-aware AI plans (student = timetable, professional = action plan)
+- ✅ **Export Plans** — download as .txt file
+- ✅ **Role-aware UI** — app knows if you're a student, professional, or both — everything adapts
+- ✅ **History with dialog** — click any history item to open full detail modal
+- ✅ **Onboarding saves to localStorage** — all preferences persist across sessions
+- ✅ **Free AI models** — uses arcee-ai/trinity-large-preview:free via OpenRouter
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Clone & Install
+### 1. Install
 
 ```bash
-git clone https://github.com/Ekisa02/decimate-ai.git
+unzip decimate-ai-v2.zip
 cd decimate-ai
 npm install
 ```
 
-### 2. Set up your API key
+### 2. Set up API key
 
 ```bash
 cp .env.example .env
 ```
 
 Edit `.env`:
-```
-VITE_OPENROUTER_API_KEY=your_key_here
+```env
+VITE_OPENROUTER_API_KEY=sk-or-v1-your-key-here
+VITE_OPENROUTER_MODEL=nvidia/nemotron-nano-12b-v2-vl:free
+VITE_OPENROUTER_MODEL_TEXT=arcee-ai/trinity-large-preview:free
 ```
 
-Get your **FREE** key at [openrouter.ai](https://openrouter.ai) — no credit card needed.
-The app uses `mistralai/mistral-7b-instruct:free` which is completely free.
+Get your **free** key at [openrouter.ai](https://openrouter.ai) — no credit card needed.
 
-### 3. Run locally
+### 3. Run
 
 ```bash
 npm run dev
@@ -53,60 +55,53 @@ Open [http://localhost:5173](http://localhost:5173)
 
 ## ☁️ Deploy to Vercel
 
-### Option A: Vercel CLI
-
+### Option A — Vercel CLI
 ```bash
 npm install -g vercel
 vercel
+# Add env var: VITE_OPENROUTER_API_KEY when prompted
 ```
 
-### Option B: Vercel Dashboard
-
+### Option B — Vercel Dashboard
 1. Push to GitHub
-2. Go to [vercel.com](https://vercel.com) → New Project → Import your repo
-3. Add environment variable: `VITE_OPENROUTER_API_KEY` = your key
-4. Click Deploy ✅
+2. Import at [vercel.com](https://vercel.com) → New Project
+3. Add environment variable: `VITE_OPENROUTER_API_KEY`
+4. Deploy ✅
 
 ---
 
 ## 🗂 Project Structure
 
 ```
-decimate-ai/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── components/
-│   │   ├── ui.jsx          # Reusable UI components (Button, Card, Chip, etc.)
-│   │   └── ui.css
-│   ├── hooks/
-│   │   └── useAI.js        # OpenRouter API hook
-│   ├── pages/
-│   │   ├── Onboarding.jsx  # 7-step onboarding flow
-│   │   ├── AppLayout.jsx   # Sidebar + topbar shell
-│   │   ├── Dashboard.jsx   # Main dashboard
-│   │   ├── Decide.jsx      # Help Me Decide + AI plan generator
-│   │   ├── Chat.jsx        # AI chat interface
-│   │   ├── History.jsx     # Saved plans
-│   │   └── Settings.jsx    # Profile + preferences
-│   ├── store/
-│   │   └── useStore.js     # Zustand store (persisted to localStorage)
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── index.css           # Global CSS design tokens
-├── .env.example
-├── vercel.json
-└── vite.config.js
+src/
+├── components/
+│   ├── ui.jsx          # Button, Card, Chip, Modal, Toast, AiText, etc.
+│   └── ui.css
+├── hooks/
+│   └── useAI.js        # OpenRouter API — chat, analyseDecision, createPlan
+├── pages/
+│   ├── Onboarding.jsx  # 7-step onboarding — saves role, goals, personality
+│   ├── AppLayout.jsx   # Sidebar + topbar + toast context
+│   ├── Dashboard.jsx   # Role-aware dashboard with stats
+│   ├── Decide.jsx      # Make Decision + Build Timetable/Plan
+│   ├── Chat.jsx        # Working AI chat with role-aware prompts
+│   ├── History.jsx     # Clickable history with detail modal
+│   └── Settings.jsx    # Profile, AI personality, custom instructions
+├── store/
+│   └── useStore.js     # Zustand store — persisted to localStorage
+├── App.jsx
+├── main.jsx
+└── index.css           # Global CSS design tokens
 ```
 
 ---
 
-## 🤖 AI Model
+## 🤖 AI Models Used
 
-- **Model**: `mistralai/mistral-7b-instruct:free`
-- **Provider**: [OpenRouter.ai](https://openrouter.ai)
-- **Cost**: Completely free
-- **Context**: User's full profile, personality mode, and custom instructions are sent with every request
+| Purpose | Model | Cost |
+|---------|-------|------|
+| Chat & Decisions | `arcee-ai/trinity-large-preview:free` | Free |
+| Vision (fallback) | `nvidia/nemotron-nano-12b-v2-vl:free` | Free |
 
 ---
 
@@ -114,14 +109,7 @@ decimate-ai/
 
 | Name | Role |
 |------|------|
-| Ekisa Joseph | CEO & Lead Engineer — BSc Information Technology |
-| Davine Othiambo | Marketing Manager — BSc Computer Science |
+| **Ekisa Joseph** | CEO & Lead Engineer — BSc Information Technology |
+| **Davine Othiambo** | Marketing Manager — BSc Computer Science |
 
-**University of Eldoret, Kenya**
-
----
-
-## 🏆 Hult Prize 2026
-
-Competing at the Kenya National Competition hosted at Strathmore University, May 2, 2026.
-Out of 18,000+ teams from 130+ countries — one of 1,500 selected for Nationals.
+**University of Eldoret, Kenya** · Hult Prize 2026

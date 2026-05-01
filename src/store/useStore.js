@@ -4,80 +4,41 @@ import { persist } from 'zustand/middleware'
 export const useStore = create(
   persist(
     (set, get) => ({
-      // ── Onboarding ─────────────────────────────
       onboarded: false,
       profile: {
-        name: '',
-        role: '',          // 'student' | 'professional' | 'both'
-        institution: '',
-        goals: [],         // ['productivity','focus','planning','wellness']
-        aiPersonality: 'balanced', // 'balanced' | 'strict' | 'zen'
-        workStyle: '',     // 'morning' | 'afternoon' | 'night' | 'flexible'
-        challenges: [],    // ['overload','fatigue','prioritization','procrastination']
+        name: '', role: '', // 'student' | 'professional' | 'both'
+        institution: '', goals: [], challenges: [],
+        aiPersonality: 'balanced', workStyle: '',
         customInstructions: '',
       },
+      stats: { decisions: 0, plans: 0, timeSaved: 0, streak: 0, focusScore: 78, lastActive: null },
+      history: [], // { id, type:'decision'|'plan', title, content, choices, result, createdAt, role }
+      messages: [], // chat messages
 
-      // ── Stats ──────────────────────────────────
-      stats: {
-        decisions: 0,
-        timeSaved: 0,    // minutes
-        streak: 0,
-        lastActive: null,
-        focusScore: 78,
-      },
+      completeOnboarding: (data) => set({ onboarded: true, profile: { ...get().profile, ...data } }),
+      updateProfile: (data) => set(s => ({ profile: { ...s.profile, ...data } })),
 
-      // ── Plans history ──────────────────────────
-      plans: [],
-
-      // ── Chat messages ──────────────────────────
-      messages: [],
-
-      // ── Actions ────────────────────────────────
-      completeOnboarding: (profileData) => set({
-        onboarded: true,
-        profile: { ...get().profile, ...profileData },
-      }),
-
-      updateProfile: (data) => set(s => ({
-        profile: { ...s.profile, ...data }
-      })),
-
-      addPlan: (plan) => set(s => ({
-        plans: [plan, ...s.plans],
+      addHistory: (item) => set(s => ({
+        history: [{ ...item, id: Date.now(), createdAt: new Date().toISOString() }, ...s.history],
         stats: {
           ...s.stats,
-          decisions: s.stats.decisions + 1,
-          timeSaved: s.stats.timeSaved + 48,
+          decisions: item.type === 'decision' ? s.stats.decisions + 1 : s.stats.decisions,
+          plans: item.type === 'plan' ? s.stats.plans + 1 : s.stats.plans,
+          timeSaved: s.stats.timeSaved + (item.type === 'plan' ? 45 : 5),
           lastActive: new Date().toISOString(),
-          streak: s.stats.streak + (isNewDay(s.stats.lastActive) ? 1 : 0),
         }
       })),
 
-      addMessage: (msg) => set(s => ({
-        messages: [...s.messages, msg]
-      })),
-
+      addMessage: (msg) => set(s => ({ messages: [...s.messages, { ...msg, id: Date.now() }] })),
       clearMessages: () => set({ messages: [] }),
 
       resetAll: () => set({
         onboarded: false,
-        profile: {
-          name: '', role: '', institution: '', goals: [],
-          aiPersonality: 'balanced', workStyle: '',
-          challenges: [], customInstructions: '',
-        },
-        stats: { decisions: 0, timeSaved: 0, streak: 0, lastActive: null, focusScore: 78 },
-        plans: [],
-        messages: [],
+        profile: { name:'',role:'',institution:'',goals:[],challenges:[],aiPersonality:'balanced',workStyle:'',customInstructions:'' },
+        stats: { decisions:0,plans:0,timeSaved:0,streak:0,focusScore:78,lastActive:null },
+        history: [], messages: [],
       }),
     }),
-    { name: 'decimate-ai-store' }
+    { name: 'decimate-ai-v2' }
   )
 )
-
-function isNewDay(lastActive) {
-  if (!lastActive) return false
-  const last = new Date(lastActive)
-  const now = new Date()
-  return last.toDateString() !== now.toDateString()
-}

@@ -1,237 +1,88 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useStore } from '../store/useStore'
-import { Button, Toggle, Textarea, Input, Progress } from '../components/ui.jsx'
+import { Btn, Toggle, Textarea, Input, Progress } from '../components/ui.jsx'
+import { useToast } from './AppLayout.jsx'
 import './Settings.css'
-
-const PERSONALITIES = [
-  { id: 'balanced', emoji: '⚖️', title: 'Balanced', desc: 'Smart, practical, and encouraging.' },
-  { id: 'strict',   emoji: '💀', title: 'Strict',   desc: 'No-nonsense. Maximum pressure.' },
-  { id: 'zen',      emoji: '🌿', title: 'Zen',      desc: 'Calm, mindful, compassionate.' },
-]
-
-export default function Settings() {
-  const profile       = useStore(s => s.profile)
-  const stats         = useStore(s => s.stats)
-  const updateProfile = useStore(s => s.updateProfile)
-  const resetAll      = useStore(s => s.resetAll)
-
-  const [saved, setSaved]   = useState(false)
-  const [confirm, setConfirm] = useState(false)
-  const [local, setLocal]   = useState({ ...profile })
-  const [notifs, setNotifs] = useState(true)
-  const [tracking, setTracking] = useState(true)
-
-  const set = (k, v) => setLocal(s => ({ ...s, [k]: v }))
-
-  const save = () => {
-    updateProfile(local)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2500)
-  }
-
-  const doReset = () => {
-    resetAll()
-    setConfirm(false)
-    window.location.reload()
-  }
-
-  return (
+const PERSONALITIES=[{id:'balanced',emoji:'⚖️',title:'Balanced',desc:'Smart, practical, and encouraging.'},{id:'strict',emoji:'💀',title:'Strict',desc:'No excuses. Maximum pressure.'},{id:'zen',emoji:'🌿',title:'Zen',desc:'Calm, mindful, compassionate.'}]
+export default function Settings(){
+  const profile=useStore(s=>s.profile),stats=useStore(s=>s.stats),updateProfile=useStore(s=>s.updateProfile),resetAll=useStore(s=>s.resetAll),toast=useToast()
+  const [local,setLocal]=useState({...profile}),set=(k,v)=>setLocal(s=>({...s,[k]:v}))
+  const [notifs,setNotifs]=useState(true),[tracking,setTracking]=useState(true),[confirm,setConfirm]=useState(false)
+  const isStudent=local.role==='student',isPro=local.role==='professional'
+  const save=()=>{updateProfile(local);toast('Settings saved!','success','✅')}
+  const doReset=()=>{resetAll();window.location.reload()}
+  return(
     <div className="settings-page">
-
-      {/* Stats row */}
-      <div className="settings-stats">
-        {[
-          { icon: '⚡', val: stats.decisions, label: 'Decisions Made', color: 'var(--gold)' },
-          { icon: '⏱', val: `${stats.timeSaved}m`, label: 'Time Saved', color: 'var(--cyan)' },
-          { icon: '🎯', val: `${stats.focusScore}%`, label: 'Focus Score', color: 'var(--green)' },
-          { icon: '🔥', val: `${stats.streak || 0}d`, label: 'Streak', color: 'var(--orange)' },
-        ].map(s => (
-          <div key={s.label} className="ss-card">
-            <div className="ss-icon" style={{ color: s.color }}>{s.icon}</div>
-            <div className="ss-val" style={{ color: s.color }}>{s.val}</div>
-            <div className="ss-label">{s.label}</div>
-          </div>
+      <div className="s-stats">
+        {[{icon:'⚡',val:stats.decisions,label:'Decisions',color:'var(--gold)'},{icon:'📅',val:stats.plans,label:isStudent?'Timetables':isPro?'Action Plans':'Plans',color:'var(--cyan)'},{icon:'⏱',val:`${stats.timeSaved}m`,label:'Time Saved',color:'var(--green)'},{icon:'🔥',val:`${stats.streak||0}d`,label:'Streak',color:'var(--orange)'}].map(s=>(
+          <div key={s.label} className="ss-card"><div className="ss-icon" style={{color:s.color}}>{s.icon}</div><div className="ss-val" style={{color:s.color}}>{s.val}</div><div className="ss-lbl">{s.label}</div></div>
         ))}
       </div>
-
-      <div className="settings-grid">
-        {/* Profile */}
-        <div className="settings-section">
-          <div className="section-title">👤 Profile</div>
-          <div className="section-body">
-            <Input
-              label="Your Name"
-              value={local.name}
-              onChange={e => set('name', e.target.value)}
-              placeholder="e.g. Ekisa Joseph"
-            />
-            <Input
-              label="Institution / Company"
-              value={local.institution}
-              onChange={e => set('institution', e.target.value)}
-              placeholder="e.g. University of Eldoret"
-            />
-            <div className="field-row">
-              <div className="input-wrap">
-                <label className="input-label">Role</label>
-                <select
-                  className="input-field"
-                  value={local.role}
-                  onChange={e => set('role', e.target.value)}
-                >
-                  <option value="">Select role</option>
-                  <option value="student">Student</option>
-                  <option value="professional">Professional</option>
-                  <option value="both">Both</option>
+      <div className="s-grid">
+        <div className="s-section">
+          <div className="s-sec-title">👤 Profile</div>
+          <div className="s-sec-body">
+            <Input label="Your Name" value={local.name} onChange={e=>set('name',e.target.value)} placeholder="e.g. Amina Wanjiku"/>
+            <Input label="Institution / Company" value={local.institution} onChange={e=>set('institution',e.target.value)} placeholder="e.g. University of Nairobi"/>
+            <div className="s-row2">
+              <div className="s-field"><label className="s-label">Role</label>
+                <select className="s-select" value={local.role} onChange={e=>set('role',e.target.value)}>
+                  <option value="">Select role</option><option value="student">🎓 Student</option><option value="professional">💼 Professional</option><option value="both">⚡ Both</option>
                 </select>
               </div>
-              <div className="input-wrap">
-                <label className="input-label">Peak Hours</label>
-                <select
-                  className="input-field"
-                  value={local.workStyle}
-                  onChange={e => set('workStyle', e.target.value)}
-                >
-                  <option value="">Select style</option>
-                  <option value="morning">Morning Person</option>
-                  <option value="afternoon">Afternoon</option>
-                  <option value="night">Night Owl</option>
-                  <option value="flexible">Flexible</option>
+              <div className="s-field"><label className="s-label">Peak Hours</label>
+                <select className="s-select" value={local.workStyle} onChange={e=>set('workStyle',e.target.value)}>
+                  <option value="">Select style</option><option value="morning">🌅 Morning Person</option><option value="afternoon">☀️ Afternoon</option><option value="night">🌙 Night Owl</option><option value="flexible">🔄 Flexible</option>
                 </select>
               </div>
             </div>
           </div>
         </div>
-
-        {/* AI Personality */}
-        <div className="settings-section">
-          <div className="section-title">🤖 AI Personality</div>
-          <div className="section-body">
-            <div className="personality-list">
-              {PERSONALITIES.map(p => (
-                <motion.div
-                  key={p.id}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`personality-card ${local.aiPersonality === p.id ? 'active' : ''}`}
-                  onClick={() => set('aiPersonality', p.id)}
-                >
-                  <span className="p-emoji">{p.emoji}</span>
-                  <div className="p-info">
-                    <div className="p-title">{p.title}</div>
-                    <div className="p-desc">{p.desc}</div>
-                  </div>
-                  <div className={`p-radio ${local.aiPersonality === p.id ? 'checked' : ''}`}>
-                    {local.aiPersonality === p.id && '✓'}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+        <div className="s-section">
+          <div className="s-sec-title">🤖 AI Personality</div>
+          <div className="s-sec-body">
+            {PERSONALITIES.map(p=>(
+              <motion.div key={p.id} whileHover={{scale:1.01}} whileTap={{scale:.99}} className={`s-personality ${local.aiPersonality===p.id?'s-personality-on':''}`} onClick={()=>set('aiPersonality',p.id)}>
+                <span style={{fontSize:22}}>{p.emoji}</span>
+                <div style={{flex:1}}><div className="sp-title">{p.title}</div><div className="sp-desc">{p.desc}</div></div>
+                <div className={`sp-radio ${local.aiPersonality===p.id?'sp-radio-on':''}`}>{local.aiPersonality===p.id&&'✓'}</div>
+              </motion.div>
+            ))}
           </div>
         </div>
-
-        {/* Custom instructions */}
-        <div className="settings-section settings-span-2">
-          <div className="section-title">✏️ AI Custom Instructions</div>
-          <div className="section-body">
-            <p className="section-desc">
-              Tell your AI anything personal — preferences, constraints, working style, or things to avoid.
-              This is sent with every AI request to deeply personalize your experience.
-            </p>
-            <Textarea
-              value={local.customInstructions}
-              onChange={e => set('customInstructions', e.target.value)}
-              placeholder={`e.g. "I hate mornings before 9am. I prefer 25-min Pomodoro blocks. I'm introverted. Never schedule meetings before noon. I work best with music."`}
-            />
-            <div className="progress-preview">
-              <Progress
-                value={Math.min((local.customInstructions?.length / 300) * 100, 100)}
-                color="gold"
-                label={[`${local.customInstructions?.length || 0} / 300 chars`, '']}
-              />
-            </div>
+        <div className="s-section s-span2">
+          <div className="s-sec-title">✏️ AI Custom Instructions</div>
+          <div className="s-sec-body">
+            <p className="s-desc">{isStudent?'Tell the AI about your studies — subjects, exam dates, study preferences.':isPro?'Tell the AI about your work — projects, priorities, working style.':'Tell the AI about both your academic and professional context.'}</p>
+            <Textarea value={local.customInstructions} onChange={e=>set('customInstructions',e.target.value)}
+              placeholder={isStudent?`e.g. "I struggle with maths. Exams start May 5th. Prefer visual learning."`:isPro?`e.g. "I work best alone. Team standup every Monday 10am."`:``}/>
+            <Progress value={Math.min((local.customInstructions?.length||0)/300*100,100)} color="gold" label={`${local.customInstructions?.length||0} / 300 chars`}/>
           </div>
         </div>
-
-        {/* Preferences */}
-        <div className="settings-section">
-          <div className="section-title">🔧 Preferences</div>
-          <div className="section-body">
-            <div className="pref-list">
-              <div className="pref-item">
-                <div className="pref-info">
-                  <div className="pref-name">🔔 Notifications</div>
-                  <div className="pref-desc">Daily wisdom and reminders</div>
-                </div>
-                <Toggle checked={notifs} onChange={setNotifs} />
-              </div>
-              <div className="pref-item">
-                <div className="pref-info">
-                  <div className="pref-name">📊 Behavior Tracking</div>
-                  <div className="pref-desc">Allow AI to learn your patterns</div>
-                </div>
-                <Toggle checked={tracking} onChange={setTracking} />
-              </div>
-              <div className="pref-item">
-                <div className="pref-info">
-                  <div className="pref-name">🌙 Dark Mode</div>
-                  <div className="pref-desc">Always on — optimized for focus</div>
-                </div>
-                <Toggle checked={true} onChange={() => {}} />
-              </div>
-            </div>
+        <div className="s-section">
+          <div className="s-sec-title">🔧 Preferences</div>
+          <div className="s-sec-body">
+            {[{icon:'🔔',name:'Notifications',desc:'Daily wisdom and reminders',val:notifs,fn:setNotifs},{icon:'📊',name:'Behavior Tracking',desc:'Let AI learn your patterns',val:tracking,fn:setTracking},{icon:'🌙',name:'Dark Mode',desc:'Always on — optimized for focus',val:true,fn:()=>{}}].map(item=>(
+              <div key={item.name} className="s-pref"><span style={{fontSize:18}}>{item.icon}</span><div style={{flex:1}}><div className="sp-title">{item.name}</div><div className="sp-desc">{item.desc}</div></div><Toggle checked={item.val} onChange={item.fn}/></div>
+            ))}
           </div>
         </div>
-
-        {/* App info */}
-        <div className="settings-section">
-          <div className="section-title">ℹ️ About</div>
-          <div className="section-body">
-            <div className="about-rows">
-              {[
-                ['Version', 'v1.0.0'],
-                ['AI Model', 'Mistral 7B Instruct (Free)'],
-                ['Provider', 'OpenRouter.ai'],
-                ['Event', 'Hult Prize 2026'],
-                ['Venue', 'Strathmore University, Nairobi'],
-                ['Team', 'Ekisa Joseph & Davine Othiambo'],
-                ['Institution', 'University of Eldoret'],
-              ].map(([k, v]) => (
-                <div key={k} className="about-row">
-                  <span className="about-key">{k}</span>
-                  <span className="about-val">{v}</span>
-                </div>
-              ))}
-            </div>
+        <div className="s-section">
+          <div className="s-sec-title">ℹ️ About</div>
+          <div className="s-sec-body">
+            {[['Version','v2.0.0'],['AI Model','arcee-ai/trinity-large-preview:free'],['Provider','OpenRouter.ai'],['Event','Hult Prize 2026'],['Venue','Strathmore University, Nairobi'],['Team','Ekisa Joseph & Davine Othiambo'],['Institution','University of Eldoret']].map(([k,v])=>(
+              <div key={k} className="s-about-row"><span className="s-about-k">{k}</span><span className="s-about-v">{v}</span></div>
+            ))}
           </div>
         </div>
       </div>
-
-      {/* Save button */}
-      <div className="settings-actions">
-        <Button variant="gold" size="lg" onClick={save}>
-          {saved ? '✅ Saved!' : '💾 Save Changes'}
-        </Button>
+      <div className="s-save-row"><Btn variant="gold" size="lg" onClick={save}>💾 Save Changes</Btn></div>
+      <div className="s-danger">
+        <div><div className="s-danger-title">⚠️ Reset All Data</div><div className="s-danger-desc">Permanently deletes preferences, history and conversations.</div></div>
+        {!confirm?<Btn variant="danger" size="sm" onClick={()=>setConfirm(true)}>Reset Everything</Btn>:
+          <div className="s-confirm"><span style={{fontSize:13,color:'var(--red)',fontWeight:600}}>Are you sure?</span><Btn variant="ghost" size="sm" onClick={()=>setConfirm(false)}>Cancel</Btn><Btn variant="danger" size="sm" onClick={doReset}>Yes, Reset</Btn></div>}
       </div>
-
-      {/* Danger zone */}
-      <div className="danger-zone">
-        <div className="dz-info">
-          <div className="dz-title">⚠️ Reset All Data</div>
-          <div className="dz-desc">This permanently deletes all your preferences, history, and conversation. Cannot be undone.</div>
-        </div>
-        {!confirm ? (
-          <Button variant="danger" size="sm" onClick={() => setConfirm(true)}>Reset Everything</Button>
-        ) : (
-          <div className="confirm-row">
-            <span className="confirm-text">Are you sure?</span>
-            <Button variant="ghost" size="sm" onClick={() => setConfirm(false)}>Cancel</Button>
-            <Button variant="danger" size="sm" onClick={doReset}>Yes, Reset</Button>
-          </div>
-        )}
-      </div>
-
     </div>
   )
 }

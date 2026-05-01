@@ -1,136 +1,155 @@
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import clsx from 'clsx'
 import './ui.css'
 
-/* ── Button ─────────────────────────────────────────── */
-export function Button({ children, variant = 'gold', size = 'md', className, loading, ...props }) {
+export function Btn({ children, variant='gold', size='md', className, loading, disabled, ...p }) {
   return (
     <motion.button
-      whileHover={{ scale: 1.02, y: -1 }}
-      whileTap={{ scale: 0.97 }}
-      className={clsx('btn', `btn-${variant}`, `btn-${size}`, className)}
-      disabled={loading || props.disabled}
-      {...props}
+      whileHover={!disabled && !loading ? { scale:1.02, y:-1 } : {}}
+      whileTap={!disabled && !loading ? { scale:0.97 } : {}}
+      className={clsx('ui-btn', `ui-btn-${variant}`, `ui-btn-${size}`, className)}
+      disabled={disabled || loading}
+      {...p}
     >
-      {loading ? <span className="btn-spinner" /> : children}
+      {loading ? <span className="ui-spin"/> : children}
     </motion.button>
   )
 }
 
-/* ── Badge ──────────────────────────────────────────── */
-export function Badge({ children, color = 'gold', className }) {
-  return <span className={clsx('badge', `badge-${color}`, className)}>{children}</span>
-}
-
-/* ── Card ───────────────────────────────────────────── */
-export function Card({ children, className, glow, onClick, ...props }) {
+export function Card({ children, className, glow, onClick, ...p }) {
   return (
     <motion.div
-      className={clsx('card', glow && 'card-glow', onClick && 'card-clickable', className)}
-      whileHover={onClick ? { y: -3, boxShadow: '0 20px 40px rgba(0,0,0,0.4)' } : undefined}
-      onClick={onClick}
-      {...props}
-    >
-      {children}
-    </motion.div>
+      className={clsx('ui-card', glow && 'ui-card-glow', onClick && 'ui-card-click', className)}
+      whileHover={onClick ? { y:-3 } : {}}
+      onClick={onClick} {...p}
+    >{children}</motion.div>
   )
 }
 
-/* ── Chip ───────────────────────────────────────────── */
-export function Chip({ children, selected, onClick, color = 'default' }) {
+export function Chip({ children, selected, onClick, color='default' }) {
   return (
     <motion.button
-      whileHover={{ scale: 1.04 }}
-      whileTap={{ scale: 0.95 }}
-      className={clsx('chip', selected && 'chip-selected', `chip-${color}`)}
+      whileHover={{ scale:1.03 }} whileTap={{ scale:0.96 }}
+      className={clsx('ui-chip', selected && 'ui-chip-on', `ui-chip-${color}`)}
       onClick={onClick}
-    >
-      {children}
-    </motion.button>
+    >{children}</motion.button>
   )
 }
 
-/* ── Input ──────────────────────────────────────────── */
-export function Input({ label, ...props }) {
+export function Input({ label, error, ...p }) {
   return (
-    <div className="input-wrap">
-      {label && <label className="input-label">{label}</label>}
-      <input className="input-field" {...props} />
+    <div className="ui-field">
+      {label && <label className="ui-label">{label}</label>}
+      <input className={clsx('ui-input', error && 'ui-input-err')} {...p}/>
+      {error && <span className="ui-err">{error}</span>}
     </div>
   )
 }
 
-/* ── Textarea ───────────────────────────────────────── */
-export function Textarea({ label, ...props }) {
+export function Textarea({ label, ...p }) {
   return (
-    <div className="input-wrap">
-      {label && <label className="input-label">{label}</label>}
-      <textarea className="input-field input-textarea" {...props} />
+    <div className="ui-field">
+      {label && <label className="ui-label">{label}</label>}
+      <textarea className="ui-input ui-textarea" {...p}/>
     </div>
   )
 }
 
-/* ── Toggle ─────────────────────────────────────────── */
-export function Toggle({ checked, onChange, label }) {
+export function Select({ label, children, ...p }) {
   return (
-    <label className="toggle-wrap">
-      {label && <span className="toggle-label">{label}</span>}
-      <div className={clsx('toggle', checked && 'toggle-on')} onClick={() => onChange(!checked)}>
-        <div className="toggle-thumb" />
-      </div>
-    </label>
+    <div className="ui-field">
+      {label && <label className="ui-label">{label}</label>}
+      <select className="ui-input" {...p}>{children}</select>
+    </div>
   )
 }
 
-/* ── Spinner ────────────────────────────────────────── */
-export function Spinner({ size = 20 }) {
-  return <div className="spinner" style={{ width: size, height: size }} />
+export function Toggle({ checked, onChange }) {
+  return (
+    <div className={clsx('ui-toggle', checked && 'ui-toggle-on')} onClick={() => onChange(!checked)}>
+      <div className="ui-toggle-thumb"/>
+    </div>
+  )
 }
 
-/* ── Stat Card ──────────────────────────────────────── */
-export function StatCard({ icon, value, label, change, color = 'gold' }) {
+export function Spinner({ size=24, color }) {
+  return <div className="ui-spin" style={{ width:size, height:size, borderTopColor: color || 'var(--gold)' }}/>
+}
+
+export function Badge({ children, color='gold' }) {
+  return <span className={clsx('ui-badge', `ui-badge-${color}`)}>{children}</span>
+}
+
+export function Modal({ open, onClose, title, children, wide }) {
   return (
-    <Card className={clsx('stat-card', `stat-card-${color}`)}>
-      <div className="stat-icon">{icon}</div>
-      <div className="stat-value">{value}</div>
-      <div className="stat-label">{label}</div>
-      {change && (
-        <div className={clsx('stat-change', change.startsWith('+') ? 'change-up' : 'change-down')}>
-          {change}
-        </div>
+    <AnimatePresence>
+      {open && (
+        <motion.div className="modal-overlay" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+          onClick={e => e.target===e.currentTarget && onClose()}>
+          <motion.div className={clsx('modal-box', wide && 'modal-wide')}
+            initial={{opacity:0,scale:0.94,y:20}} animate={{opacity:1,scale:1,y:0}} exit={{opacity:0,scale:0.94,y:10}}>
+            <div className="modal-header">
+              <div className="modal-title">{title}</div>
+              <button className="modal-close" onClick={onClose}>✕</button>
+            </div>
+            <div className="modal-body">{children}</div>
+          </motion.div>
+        </motion.div>
       )}
-    </Card>
+    </AnimatePresence>
   )
 }
 
-/* ── Progress Bar ───────────────────────────────────── */
-export function Progress({ value, color = 'gold', label }) {
+export function Toast({ toasts, remove }) {
   return (
-    <div className="progress-wrap">
-      {label && <div className="progress-label">{label}</div>}
-      <div className="progress-track">
-        <motion.div
-          className={clsx('progress-fill', `progress-${color}`)}
-          initial={{ width: 0 }}
-          animate={{ width: `${value}%` }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-        />
+    <div className="toast-wrap">
+      <AnimatePresence>
+        {toasts.map(t => (
+          <motion.div key={t.id} className={clsx('toast', `toast-${t.type||'info'}`)}
+            initial={{x:100,opacity:0}} animate={{x:0,opacity:1}} exit={{x:100,opacity:0}}>
+            <span>{t.icon||'💬'}</span> {t.message}
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+export function Progress({ value, color='gold', label }) {
+  return (
+    <div className="ui-progress-wrap">
+      {label && <div className="ui-progress-label">{label}</div>}
+      <div className="ui-progress-track">
+        <motion.div className={clsx('ui-progress-fill', `ui-progress-${color}`)}
+          initial={{width:0}} animate={{width:`${Math.min(value,100)}%`}} transition={{duration:0.8}}/>
       </div>
     </div>
   )
 }
 
-/* ── Toast ──────────────────────────────────────────── */
-export function Toast({ message, icon = '✅', onDone }) {
+// AI response bubble formatter
+export function AiText({ text }) {
+  if (!text) return null
   return (
-    <motion.div
-      className="toast"
-      initial={{ x: 100, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: 100, opacity: 0 }}
-      onAnimationComplete={() => setTimeout(onDone, 2800)}
-    >
-      <span>{icon}</span> {message}
-    </motion.div>
+    <div className="ai-text">
+      {text.split('\n').map((line, i) => {
+        if (line.startsWith('BEST CHOICE:')) return <div key={i} className="ai-best-choice">{line.replace('BEST CHOICE:','').trim()}</div>
+        if (line.startsWith('WHY:')) return <div key={i} className="ai-why"><strong>Why:</strong> {line.replace('WHY:','').trim()}</div>
+        if (line.startsWith('TRADE-OFF:')) return <div key={i} className="ai-tradeoff"><strong>Trade-off:</strong> {line.replace('TRADE-OFF:','').trim()}</div>
+        if (line.startsWith('TIMETABLE TITLE:') || line.startsWith('PLAN TITLE:')) return <div key={i} className="ai-plan-title">{line.split(':')[1]?.trim()}</div>
+        if (line.startsWith('TIME BLOCKS:') || line.startsWith('PRIORITY TASKS:') || line.startsWith('EXECUTION SCHEDULE:') || line.startsWith('STUDY TIPS:') || line.startsWith('KEY MILESTONES:') || line.startsWith('MORNING') || line.startsWith('AFTERNOON') || line.startsWith('EVENING') || line.startsWith('BALANCE TIPS:')) return <div key={i} className="ai-section-head">{line}</div>
+        if (line.includes('|')) {
+          const parts = line.split('|').map(p => p.trim())
+          return (
+            <div key={i} className="ai-table-row">
+              {parts.map((p, j) => <span key={j} className={j===0 ? 'ai-time' : j===1 ? 'ai-task' : 'ai-note'}>{p}</span>)}
+            </div>
+          )
+        }
+        if (line.startsWith('-') || line.startsWith('•')) return <div key={i} className="ai-bullet">{line}</div>
+        if (line.trim() === '') return <div key={i} className="ai-spacer"/>
+        return <div key={i} className="ai-line">{line}</div>
+      })}
+    </div>
   )
 }
